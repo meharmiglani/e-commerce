@@ -11,24 +11,15 @@ import Colors from "../../constants/Colors";
 
 const ProductItem = (props) => {
   return (
-    <TouchableOpacity onPress={props.onViewDetail}>
-      <View style={styles.product}>
-        <Image style={styles.image} source={{ uri: props.image }} />
-        <View style={styles.content}>
-          <Text style={styles.title}>{props.title}</Text>
-          <Text style={styles.price}>${props.price.toFixed(2)}</Text>
-        </View>
-        <View style={styles.actions}>
-          <Button
-            color={Colors.accent}
-            title='View Details'
-            onPress={props.onViewDetail}
-          />
-          <Button
-            color={Colors.accent}
-            title='Add to Cart'
-            onPress={props.addToCart}
-          />
+    <TouchableOpacity onPress={props.onSelect}>
+      <View style={styles.main}>
+        <View style={styles.product}>
+          <Image style={styles.image} source={{ uri: props.image }} />
+          <View style={styles.content}>
+            <Text style={styles.title}>{props.title}</Text>
+            <Text style={styles.price}>${props.price.toFixed(2)}</Text>
+          </View>
+          <View style={styles.actions}>{props.children}</View>
         </View>
       </View>
     </TouchableOpacity>
@@ -37,15 +28,20 @@ const ProductItem = (props) => {
 
 const styles = StyleSheet.create({
   product: {
-    shadowColor: "black",
-    shadowOpacity: 0.25,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 5,
-    borderRadius: 10,
-    backgroundColor: "white",
-    height: 300,
-    margin: 20,
+    height: "100%",
     overflow: "hidden",
+    borderRadius: 10,
+  },
+
+  main: {
+    height: 300,
+    shadowColor: "black",
+    shadowOpacity: 0.3,
+    shadowOffset: { width: 0, height: 2.5 },
+    shadowRadius: 5,
+    backgroundColor: "white",
+    margin: 20,
+    borderRadius: 10,
   },
 
   image: {

@@ -3,6 +3,7 @@ import { createStore, combineReducers } from "redux";
 import { Provider } from "react-redux";
 import productsReducer from "./store/reducers/products";
 import cartsReducer from './store/reducers/cart';
+import ordersReducer from './store/reducers/orders';
 import ShopNavigator from "./navigation/ShopNavigator";
 import { enableScreens } from "react-native-screens";
 import { AppLoading } from "expo";
@@ -12,7 +13,8 @@ enableScreens();
 
 const rootReducer = combineReducers({
   products: productsReducer,
-  cart: cartsReducer
+  cart: cartsReducer,
+  orders: ordersReducer
 });
 
 const store = createStore(rootReducer);
