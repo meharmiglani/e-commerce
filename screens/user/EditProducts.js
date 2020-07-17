@@ -1,18 +1,18 @@
-import React, { useEffect, useCallback, useReducer } from "react";
+import React, { useEffect, useCallback, useReducer } from 'react';
 import {
   View,
-  Text,
   ScrollView,
-  TextInput,
   StyleSheet,
   Alert,
-} from "react-native";
-import { HeaderButtons, Item } from "react-navigation-header-buttons";
-import HeaderButton from "../../components/UI/HeaderButton";
-import { useSelector, useDispatch } from "react-redux";
-import * as productActions from "../../store/actions/products";
+  KeyboardAvoidingView,
+} from 'react-native';
+import { HeaderButtons, Item } from 'react-navigation-header-buttons';
+import HeaderButton from '../../components/UI/HeaderButton';
+import { useSelector, useDispatch } from 'react-redux';
+import * as productActions from '../../store/actions/products';
+import Input from '../../components/UI/Input';
 
-const FORM_UPDATE = "UPDATE";
+const FORM_UPDATE = 'UPDATE';
 
 const formReducer = (state, action) => {
   if (action.type === FORM_UPDATE) {
@@ -31,14 +31,14 @@ const formReducer = (state, action) => {
     return {
       inputValues: updatedValues,
       inputValidity: updatedValidities,
-      formIsValid
+      formIsValid,
     };
   }
   return state;
 };
 
 export default EditProductScreen = (props) => {
-  const prodId = props.navigation.getParam("productId");
+  const prodId = props.navigation.getParam('productId');
   const editedProduct = useSelector((state) =>
     state.products.userProducts.find((prod) => prod.id === prodId)
   );
@@ -47,10 +47,10 @@ export default EditProductScreen = (props) => {
 
   const [formState, dispatchFormState] = useReducer(formReducer, {
     inputValues: {
-      title: editedProduct ? editedProduct.title : "",
-      image: editedProduct ? editedProduct.imageURL : "",
-      price: "",
-      desc: editedProduct ? editedProduct.description : "",
+      title: editedProduct ? editedProduct.title : '',
+      image: editedProduct ? editedProduct.imageURL : '',
+      price: '',
+      desc: editedProduct ? editedProduct.description : '',
     },
     inputValidity: {
       title: editedProduct ? true : false,
@@ -63,14 +63,29 @@ export default EditProductScreen = (props) => {
 
   const submitHandler = useCallback(() => {
     if (!formState.formIsValid) {
-      Alert.alert("Wrong input!", "Please check for errors", {
-        text: "Okay",
+      Alert.alert('Wrong input!', 'Please check for errors', {
+        text: 'Okay',
       });
+      return;
     }
     if (editedProduct) {
-      dispatch(productActions.editProduct(prodId, formState.inputValues.title, formState.inputValues.image, formState.inputValues.desc));
+      dispatch(
+        productActions.editProduct(
+          prodId,
+          formState.inputValues.title,
+          formState.inputValues.image,
+          formState.inputValues.desc
+        )
+      );
     } else {
-      dispatch(productActions.addProduct(formState.inputValues.title, formState.inputValues.image, +formState.inputValues.price, formState.inputValues.desc));
+      dispatch(
+        productActions.addProduct(
+          formState.inputValues.title,
+          formState.inputValues.image,
+          +formState.inputValues.price,
+          formState.inputValues.desc
+        )
+      );
     }
     props.navigation.goBack();
   }, [dispatch, prodId, formState]);
@@ -79,72 +94,86 @@ export default EditProductScreen = (props) => {
     props.navigation.setParams({ submit: submitHandler });
   }, [submitHandler]);
 
-  const textChangeHandler = (inputIdentifier, text) => {
-    let isValid = false;
-    if (text.length > 0) {
-      isValid = true;
-    }
-    dispatchFormState({
-      type: FORM_UPDATE,
-      value: text,
-      isValid,
-      input: inputIdentifier,
-    });
-  };
+  const inputChangeHandler = useCallback(
+    (inputIdentifier, value, isValid) => {
+      dispatchFormState({
+        type: FORM_UPDATE,
+        value,
+        isValid,
+        input: inputIdentifier,
+      });
+    },
+    [dispatchFormState]
+  );
 
   return (
-    <ScrollView>
-      <View style={styles.form}>
-        <View style={styles.formControl}>
-          <Text style={styles.label}>Title</Text>
-          <TextInput
-            style={styles.input}
-            value={formState.inputValues.title}
-            onChange={textChangeHandler.bind(this, "title")}
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior='padding'
+      keyboardVerticalOffset={100}
+    >
+      <ScrollView>
+        <View style={styles.form}>
+          <Input
+            id='title'
+            label='Title'
+            errorText='Please enter a valid title'
             keyboardType='default'
             autoCapitalize='sentences'
             autoCorrect
+            required
+            onInputChange={inputChangeHandler}
+            initialValue={editedProduct ? editedProduct.title : ''}
+            initialValid={!!editedProduct}
           />
-        </View>
-        <View style={styles.formControl}>
-          <Text style={styles.label}>Image URL</Text>
-          <TextInput
-            style={styles.input}
-            value={formState.inputValues.image}
-            onChange={textChangeHandler.bind(this, image)}
+          <Input
+            id='image'
+            label='Image URL'
+            onInputChange={inputChangeHandler}
+            required
+            errorText='Please enter a valid image URL'
+            keyboardType='default'
+            initialValue={editedProduct ? editedProduct.imageURL : ''}
+            initialValid={!!editedProduct}
           />
-        </View>
-        {!editedProduct && (
-          <View style={styles.formControl}>
-            <Text style={styles.label}>Price</Text>
-            <TextInput
-              style={styles.input}
-              value={formState.inputValues.price}
-              onChange={textChangeHandler.bind(this, "price")}
+          {!editedProduct && (
+            <Input
+              id='price'
+              onInputChange={inputChangeHandler}
+              required
+              min={0.1}
+              label='Price'
+              errorText='Please enter a valid price'
               keyboardType='decimal-pad'
             />
-            {!formState.inputValidity.title && <Text>Please enter a valid title</Text>}
-          </View>
-        )}
-        <View style={styles.formControl}>
-          <Text style={styles.label}>Description</Text>
-          <TextInput
-            style={styles.input}
-            value={formState.inputValues.desc}
-            onChange={textChangeHandler.bind(this, "desc")}
+          )}
+          <Input
+            id='desc'
+            required
+            onInputChange={inputChangeHandler}
+            min={5}
+            label='Description'
+            errorText='Please enter a valid description'
+            keyboardType='default'
+            autoCapitalize='sentences'
+            autoCorrect
+            multiline
+            numberOfLines={3}
+            initialValue={editedProduct ? editedProduct.description : ''}
+            initialValid={!!editedProduct}
           />
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
 EditProductScreen.navigationOptions = (navData) => {
-  const submitFn = navData.navigation.getParam("submit");
+  const submitFn = navData.navigation.getParam('submit');
   return {
-    headerTitle: navData.navigation.getParam("productId")
-      ? "Edit Product"
-      : "Add Product",
+    headerTitle: navData.navigation.getParam('productId')
+      ? 'Edit Product'
+      : 'Add Product',
     headerRight: (
       <HeaderButtons HeaderButtonComponent={HeaderButton}>
         <Item title='Save' iconName='ios-checkmark' onPress={submitFn} />
@@ -156,21 +185,5 @@ EditProductScreen.navigationOptions = (navData) => {
 const styles = StyleSheet.create({
   form: {
     margin: 20,
-  },
-
-  formControl: {
-    width: "100%",
-  },
-
-  label: {
-    fontFamily: "open-sans-bold",
-    marginVertical: 8,
-  },
-
-  input: {
-    paddingHorizontal: 2,
-    paddingVertical: 5,
-    borderBottomColor: "#ccc",
-    borderBottomWidth: 1,
   },
 });
