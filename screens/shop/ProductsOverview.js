@@ -1,25 +1,91 @@
-import React from "react";
-import { FlatList, Button } from "react-native";
-import { useSelector, useDispatch } from "react-redux";
-import ProductItem from "../../components/shop/ProductItem";
-import * as cartActions from "../../store/actions/cart";
-import { HeaderButtons, Item } from "react-navigation-header-buttons";
-import HeaderButton from "../../components/UI/HeaderButton";
-import Colors from "../../constants/Colors";
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  View,
+  FlatList,
+  Button,
+  ActivityIndicator,
+  View,
+  StyleSheet,
+  Text,
+} from 'react-native';
+import { useSelector, useDispatch } from 'react-redux';
+import ProductItem from '../../components/shop/ProductItem';
+import * as cartActions from '../../store/actions/cart';
+import { HeaderButtons, Item } from 'react-navigation-header-buttons';
+import HeaderButton from '../../components/UI/HeaderButton';
+import Colors from '../../constants/Colors';
+import { useEffect } from 'react';
+import * as productActions from '../../store/actions/products';
 
 const ProductsOverviewScreen = (props) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState();
   const products = useSelector((state) => state.products.availableProducts);
   const dispatch = useDispatch();
 
   const onSelectHandler = (id, title) => {
     props.navigation.navigate({
-      routeName: "ProductDetail",
+      routeName: 'ProductDetail',
       params: {
         productId: id,
         productTitle: title,
       },
     });
   };
+
+  const loadProducts = useCallback(async () => {
+    setError(null);
+    setIsLoading(true);
+    try {
+      await dispatch(productActions.fetchProducts());
+    } catch (err) {
+      setError(err.message);
+    }
+    setIsLoading(false);
+  }, [dispatch, setIsLoading, setError]);
+
+  useEffect(() => {
+    loadProducts();
+  }, [dispatch, loadProducts]);
+
+  useEffect(() => {
+    const willFocusSub = props.navigation.addListener(
+      'willFocus',
+      loadProducts
+    );
+
+    return () => {
+      willFocusSub.remove();
+    };
+  }, [loadProducts]);
+
+  if (isLoading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size='large' color={Colors.accent} />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.centered}>
+        <Text>An error occurred!</Text>
+        <Button
+          title='Try Again?'
+          onPress={loadProducts}
+          color={Colors.accent}
+        />
+      </View>
+    );
+  }
+  if (!isLoading && products.length === 0) {
+    return (
+      <View style={styles.centered}>
+        <Text>No products found!</Text>
+      </View>
+    );
+  }
 
   return (
     <FlatList
@@ -56,13 +122,13 @@ const ProductsOverviewScreen = (props) => {
 
 ProductsOverviewScreen.navigationOptions = (navData) => {
   return {
-    headerTitle: "All Products",
+    headerTitle: 'All Products',
     headerRight: (
       <HeaderButtons HeaderButtonComponent={HeaderButton}>
         <Item
           title='Cart'
           iconName='ios-cart'
-          onPress={() => navData.navigation.navigate("Cart")}
+          onPress={() => navData.navigation.navigate('Cart')}
         />
       </HeaderButtons>
     ),
@@ -77,5 +143,13 @@ ProductsOverviewScreen.navigationOptions = (navData) => {
     ),
   };
 };
+
+const styles = StyleSheet.create({
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
 
 export default ProductsOverviewScreen;

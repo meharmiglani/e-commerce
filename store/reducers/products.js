@@ -1,14 +1,24 @@
-import PRODUCTS from "../../data/dummy-data";
-import { DELETE_PRODUCT, ADD_PRODUCT, EDIT_PRODUCT } from "../actions/products";
-import Product from "../../models/product";
+import PRODUCTS from '../../data/dummy-data';
+import {
+  DELETE_PRODUCT,
+  ADD_PRODUCT,
+  EDIT_PRODUCT,
+  SET_PRODUCTS,
+} from '../actions/products';
+import Product from '../../models/product';
 
 const initialState = {
   availableProducts: PRODUCTS,
-  userProducts: PRODUCTS.filter((product) => product.ownerId === "u1"),
+  userProducts: PRODUCTS.filter((product) => product.ownerId === 'u1'),
 };
 
 export default (state = initialState, action) => {
   switch (action.type) {
+    case SET_PRODUCTS:
+      return {
+        availableProducts: action.products,
+        userProducts: action.products.filter((prod) => prod.ownerId === 'u1'),
+      };
     case DELETE_PRODUCT:
       productId = action.productId;
       return {
@@ -23,8 +33,8 @@ export default (state = initialState, action) => {
 
     case ADD_PRODUCT:
       const newProduct = new Product(
-        new Date().toString(),
-        "u1",
+        action.productData.id,
+        'u1',
         action.productData.title,
         action.productData.imageURL,
         action.productData.desc,
