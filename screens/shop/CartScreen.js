@@ -1,12 +1,20 @@
-import React from "react";
-import { View, Text, FlatList, Button, StyleSheet } from "react-native";
-import { useSelector, useDispatch } from "react-redux";
-import Colors from "../../constants/Colors";
-import CartItem from "../../components/shop/CartItem";
-import * as cartActions from "../../store/actions/cart";
-import * as orderActions from "../../store/actions/orders";
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  Button,
+  StyleSheet,
+  ActivityIndicator,
+} from 'react-native';
+import { useSelector, useDispatch } from 'react-redux';
+import Colors from '../../constants/Colors';
+import CartItem from '../../components/shop/CartItem';
+import * as cartActions from '../../store/actions/cart';
+import * as orderActions from '../../store/actions/orders';
 
 const CartScreen = (props) => {
+  const [isLoading, setIsLoading] = useState(false);
   const totalPrice = useSelector((state) => state.cart.totalAmount);
 
   const cartItems = useSelector((state) => {
@@ -19,7 +27,7 @@ const CartScreen = (props) => {
         quantity: state.cart.items[key].quantity,
         sum: state.cart.items[key].sum,
       });
-    } 
+    }
     return transformedCartItems.sort((a, b) =>
       a.productId > b.productId ? 1 : -1
     );
@@ -41,6 +49,12 @@ const CartScreen = (props) => {
     );
   };
 
+  const sendOrderHandler = async () => {
+    setIsLoading(true);
+    await dispatch(orderActions.addOrder(cartItems, totalPrice));
+    setIsLoading(false);
+  };
+
   return (
     <View style={styles.screen}>
       <Text style={styles.cartText}>Cart Details</Text>
@@ -51,15 +65,21 @@ const CartScreen = (props) => {
       />
       <View style={styles.summary}>
         <Text style={styles.summaryText}>
-          Total Price:{" "}
-          <Text style={styles.amount}>${Math.round(totalPrice.toFixed(2) * 100) / 100}</Text>
+          Total Price:{' '}
+          <Text style={styles.amount}>
+            ${Math.round(totalPrice.toFixed(2) * 100) / 100}
+          </Text>
         </Text>
-        <Button
-          color='white'
-          title='Order Now'
-          disabled={cartItems.length === 0}
-          onPress={() => dispatch(orderActions.addOrder(cartItems, totalPrice))}
-        />
+        {isLoading ? (
+          <ActivityIndicator size='small' color={Colors.accent} />
+        ) : (
+          <Button
+            color='white'
+            title='Order Now'
+            disabled={cartItems.length === 0}
+            onPress={sendOrderHandler}
+          />
+        )}
       </View>
     </View>
   );
@@ -71,12 +91,12 @@ const styles = StyleSheet.create({
   },
 
   summary: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginVertical: 20,
     padding: 10,
-    shadowColor: "black",
+    shadowColor: 'black',
     shadowOpacity: 0.25,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 5,
@@ -85,7 +105,7 @@ const styles = StyleSheet.create({
   },
 
   summaryText: {
-    fontFamily: "open-sans-bold",
+    fontFamily: 'open-sans-bold',
     fontSize: 15,
   },
 
@@ -94,9 +114,9 @@ const styles = StyleSheet.create({
   },
 
   cartText: {
-    textAlign: "center",
+    textAlign: 'center',
     color: Colors.accent,
-    fontFamily: "open-sans-bold",
+    fontFamily: 'open-sans-bold',
     fontSize: 20,
   },
 });
