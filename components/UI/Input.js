@@ -69,7 +69,7 @@ export default Input = (props) => {
         {...props}
         style={styles.input}
         value={inputState.value}
-        onChange={textChangeHandler}
+        onChangeText={textChangeHandler}
         onBlur={lostFocusHandler}
       />
       {!inputState.isValid && inputState.touched && (

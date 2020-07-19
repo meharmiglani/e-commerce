@@ -4,10 +4,11 @@ export const ADD_ORDER = 'ADD_ORDER';
 export const SET_ORDER = 'SET_ORDER';
 
 export const fetchOrders = () => {
-  return async (dispatch) => {
+  return async (dispatch, getState) => {
+    const userId = getState().auth.userId;
     try {
       const response = await fetch(
-        'https://e-commerce-2212.firebaseio.com/orders/u1.json'
+        `https://e-commerce-2212.firebaseio.com/orders/${userId}.json`
       );
 
       if (!response.ok) {
@@ -27,7 +28,7 @@ export const fetchOrders = () => {
           )
         );
       }
-      
+
       dispatch({
         type: SET_ORDER,
         orders: loadedOrders,
@@ -39,11 +40,13 @@ export const fetchOrders = () => {
 };
 
 export const addOrder = (cartItems, totalAmount) => {
-  return async (dispatch) => {
+  return async (dispatch, getState) => {
+    const token = getState().auth.token;
+    const userId = getState().auth.userId;
     const date = new Date();
 
     const response = await fetch(
-      'https://e-commerce-2212.firebaseio.com/orders/u1.json',
+      `https://e-commerce-2212.firebaseio.com/orders/${userId}.json?auth=${token}`,
       {
         method: 'POST',
         headers: {

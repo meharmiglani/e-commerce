@@ -4,7 +4,6 @@ import {
   FlatList,
   Button,
   ActivityIndicator,
-  View,
   StyleSheet,
   Text,
 } from 'react-native';
@@ -14,7 +13,6 @@ import * as cartActions from '../../store/actions/cart';
 import { HeaderButtons, Item } from 'react-navigation-header-buttons';
 import HeaderButton from '../../components/UI/HeaderButton';
 import Colors from '../../constants/Colors';
-import { useEffect } from 'react';
 import * as productActions from '../../store/actions/products';
 
 const ProductsOverviewScreen = (props) => {

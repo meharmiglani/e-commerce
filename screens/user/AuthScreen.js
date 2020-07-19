@@ -40,10 +40,6 @@ const formReducer = (state, action) => {
   return state;
 };
 
-useEffect(() => {
-  Alert.alert('An error occurred!', error, [{ text: 'Okay!' }]);
-}, [error]);
-
 const AuthScreen = (props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState();
@@ -61,6 +57,12 @@ const AuthScreen = (props) => {
     },
     formIsValid: false,
   });
+
+  useEffect(() => {
+    if (error) {
+      Alert.alert('An error occurred!', error, [{ text: 'Okay!' }]);
+    }
+  }, [error]);
 
   const authHandler = async () => {
     let action;
@@ -127,7 +129,7 @@ const AuthScreen = (props) => {
               minLength={5}
               autoCapitalize='none'
               errorText='Please enter a valid password'
-              onInputChange={() => {}}
+              onInputChange={inputChangeHandler}
               initialValue=''
             />
             <View style={styles.buttonContainer}>
