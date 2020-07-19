@@ -43,9 +43,22 @@ export const fetchProducts = () => {
 };
 
 export const deleteProduct = (productId) => {
-  return {
-    type: DELETE_PRODUCT,
-    productId,
+  return async (dispatch) => {
+    const res = await fetch(
+      `https://e-commerce-2212.firebaseio.com/products/${productId}.json`,
+      {
+        method: 'DELETE'
+      }
+    );
+
+    if(!res.ok){
+      throw new Error('Something went wrong!');
+    }
+
+    dispatch({
+      type: DELETE_PRODUCT,
+      productId,
+    });
   };
 };
 
@@ -84,13 +97,31 @@ export const addProduct = (title, imageURL, price, desc) => {
 };
 
 export const editProduct = (id, title, imageURL, desc) => {
-  return {
-    type: EDIT_PRODUCT,
-    productId: id,
-    productData: {
-      title,
-      imageURL,
-      desc,
-    },
+  return async (dispatch) => {
+    const response = await fetch(`https://e-commerce-2212.firebaseio.com/products/${id}.json`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        title,
+        desc,
+        imageURL,
+      })
+    });
+
+    if(!response.ok){
+      throw new Error('Something went wrong!');
+    }
+
+    dispatch({
+      type: EDIT_PRODUCT,
+      productId: id,
+      productData: {
+        title,
+        imageURL,
+        desc,
+      },
+    });
   };
 };
